@@ -16,7 +16,7 @@ class Crawler:
 
     def find_pages(self):
         page = urllib.request.urlopen(self.request_url)
-        soup = BeautifulSoup(page, "html.parser")
+        soup = BeautifulSoup(page, 'html.parser')
         links = []
         for link in soup.findAll('a', {'class': self.class_attribute}, href=True):
             if link.get('href')[0] == '/':
@@ -28,7 +28,11 @@ class Crawler:
         request = requests.get(url)
         request.encoding = request.apparent_encoding
         if request.status_code == 200:
-            return request.text
+            soup = BeautifulSoup(urllib.request.urlopen(url), 'html.parser')
+            bad_tags = ['style', 'link', 'script']
+            for tag in soup.find_all(bad_tags):
+                tag.extract()
+            return str(soup)
         return None
 
     def download_pages(self, count: int = 100):
