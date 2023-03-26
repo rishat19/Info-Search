@@ -34,17 +34,16 @@ class VectorSearch:
 
     def read_tf_idf(self):
         file_names = listdir(self.tf_idf_folder_name)
-        self.matrix = np.zeros((len(self.lemmas), len(file_names)))
+        self.matrix = np.zeros((len(file_names), len(self.lemmas)))
         for file_name in file_names:
             file_number = int(re.search('\\d+', file_name)[0])
             with open(self.tf_idf_folder_name + '/' + file_name, 'r', encoding='utf-8') as file:
                 lines = file.readlines()
                 for i in range(len(lines)):
                     lemma, idf, tf_idf = lines[i].split(' ')
-                    self.matrix[i][file_number - 1] = float(tf_idf)
-        self.matrix = self.matrix.T
+                    self.matrix[file_number - 1][i] = float(tf_idf)
 
-    def vectorize(self, query: str) -> np.asarray:
+    def vectorize(self, query: str) -> np.ndarray:
         vector = np.zeros(len(self.lemmas))
         tokens = word_tokenize(query)
         for token in tokens:
