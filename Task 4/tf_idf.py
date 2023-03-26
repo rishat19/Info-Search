@@ -19,6 +19,7 @@ class FrequencyCounter:
         self.read_lemmas()
         self.pages = []
         self.counters = []
+        self.file_names = []
 
     def read_tokens(self):
         file = open(self.tokens_file_name, 'r')
@@ -39,8 +40,10 @@ class FrequencyCounter:
     def get_tokens_data(self):
         self.pages = []
         self.counters = []
+        self.file_names = []
         for file_name in listdir(self.pages_folder_name):
             file = open(self.pages_folder_name + '/' + file_name, 'r', encoding='utf-8')
+            self.file_names.append(re.search('\\d+', file_name)[0])
             text = BeautifulSoup(file, features='html.parser').get_text()
             list_of_words = wordpunct_tokenize(text)
             tokens = []
@@ -54,8 +57,10 @@ class FrequencyCounter:
     def get_lemmas_data(self):
         self.pages = []
         self.counters = []
+        self.file_names = []
         for file_name in listdir(self.pages_folder_name):
             file = open(self.pages_folder_name + '/' + file_name, 'r', encoding='utf-8')
+            self.file_names.append(re.search('\\d+', file_name)[0])
             text = BeautifulSoup(file, features='html.parser').get_text()
             list_of_words = wordpunct_tokenize(text)
             lemmas = []
@@ -103,24 +108,20 @@ class FrequencyCounter:
         tf = self.get_tf(self.tokens)
         idf = self.get_idf(len(self.pages), self.tokens)
         tf_idf = self.get_tf_idf(tf, idf, self.tokens)
-        i = 1
-        for page_tf_idf in tf_idf:
-            with open(path.dirname(__file__) + f'/tokens_tf_idf/{i}.txt', 'w', encoding='utf-8') as file:
+        for page_tf_idf, file_name in zip(tf_idf, self.file_names):
+            with open(path.dirname(__file__) + f'/tokens_tf_idf/{file_name}.txt', 'w', encoding='utf-8') as file:
                 for word in self.tokens:
                     file.write(f'{word} {idf[word]} {page_tf_idf[word]}\n')
-            i += 1
 
     def calculate_tf_idf_for_lemmas(self):
         self.get_lemmas_data()
         tf = self.get_tf(self.lemmas)
         idf = self.get_idf(len(self.pages), self.lemmas)
         tf_idf = self.get_tf_idf(tf, idf, self.lemmas)
-        i = 1
-        for page_tf_idf in tf_idf:
-            with open(path.dirname(__file__) + f'/lemmas_tf_idf/{i}.txt', 'w', encoding='utf-8') as file:
+        for page_tf_idf, file_name in zip(tf_idf, self.file_names):
+            with open(path.dirname(__file__) + f'/lemmas_tf_idf/{file_name}.txt', 'w', encoding='utf-8') as file:
                 for word in self.lemmas:
                     file.write(f'{word} {idf[word]} {page_tf_idf[word]}\n')
-            i += 1
 
 
 if __name__ == '__main__':
